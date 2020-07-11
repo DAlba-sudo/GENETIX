@@ -1,4 +1,5 @@
 import Random
+import numpy as np
 
 #a gene is a specific attribute 
 
@@ -76,3 +77,46 @@ class Chromosome:
 		
 		self.brewRate = Gene(chromo.brewRate)
 	
+	#translates geneInfo into an array containing only information needed to create the coffee
+	def translateToRecipe(self, chromo=None):
+		
+		#if chromo is not supplied, assume you are translating yourself
+		if (chromo is None):
+			return [self.qCoffee, self.qWater, self.qCreamer, self.qSugar, self.qMilk, self.brewRate]
+		#if chromo is supplied, assume you are translating the chromosome
+		else:
+			return [chromo.qCoffee, chromo.qWater, chromo.qCreamer, chromo.qSugar, chromo.qMilk, chromo.brewRate]
+
+	#given the length of an array choose a random spot to split it
+	def selectCrossoverPoint(self, lengthArr):
+		minVal = 0; # this is minimum index we want to split at
+		return np.random.randint(0, lengthArr)	
+			
+	
+	def crossover(self):
+		# arrays are assigned (this allows us to manipulate the vars)
+		primArray = translateToRecipe(self.primaryParent)
+		secondArray = translateToRecipe(self.secondaryParent)
+		
+		#pick crossover point
+		crossOverPoint = selectCrossoverPoint(len(primArray))
+		
+		#create sublists of each array
+		primarySplit1 = primArray[0:crossOverPoint]
+		primarySplit2 = primArray[crossOverPoint:]
+		secondarySplit1 = secondArray[0:crossOverPoint]
+		secondarySplit2 = secondArray[crossOverPoint:]
+		
+		#pick one of primary and one of secondary and create child
+		
+			
+		
+		
+	#function used to create the child from the two parents
+	def createChild(self):
+		#if there are two parents do the following:
+		if((self.primaryParent is not None) and (self.secondaryParent is not None)):
+			#init crossover
+		else:
+			raise Exception("Can't create child. Need two parents!")
+			 
