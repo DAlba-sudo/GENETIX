@@ -2,11 +2,25 @@ from chromosomeV2 import Gene
 from chromosomeV2 import Chromo
 from GACodeBase import GA
 
+from sklearn import linear_model
+import numpy as np
+
 # This algorithm is made to control the gain values for the individual genes to create the chromosomes
 # Kind of like the main settings files
 
+geneticAlg = GA()
+
 GLOBAL_SOLUTION_ARR = [26.0, 12.34, 5.64, 53.8]
 GLOBAL_SOLUTION = Chromo(parent=GLOBAL_SOLUTION_ARR)
+
+INITIAL_MUTATION = 0.20
+STANDARD_MUTATION = 0.25
+
+# GENE Specific Mutation
+qCM = STANDARD_MUTATION
+qWM = STANDARD_MUTATION
+qSM = STANDARD_MUTATION
+qMM = STANDARD_MUTATION
 
 # Maps array to index for GENES
 GENE_MAP = {
@@ -16,34 +30,91 @@ GENE_MAP = {
     "qMilk": 3
 }
 
-#we need to be able to analyze the increase in specific gene values and their corresponding fitness (decrease in sugar => increase in fitness; the program should take note of this)
+# we need to be able to analyze the increase in specific gene values and their corresponding fitness 
+# (decrease in sugar => increase in fitness; the program should take note of this)
+GENE_MUTATION_MAP = {
+    0: qCM,
+    1: qWM,
+    2: qSM,
+    3: qMM
+}
 
 
+class LGModel:
+    def __init__(self, train_x, train_y):
+        self.LGM = linear_model.LinearRegression()
+        self.train_x = train_x
+        self.train_y = train_y
 
-INITIAL_MUTATION = 0.20
+    def trainModel(self):
+        self.LGM.fit(self.train_x, self.train_y)
 
-geneticAlg = GA()
+    def predict(x):
+        return self.LGM.predict(x)
 
 class Population:
-    def __init__(self, n): # create population of n individuals
+    def __init__(self): # create population of n individuals
         self.population = []
-        while (len(self.population) != n):
-            # create individual
-            tempArr = []
-
-            for i in range(len(GLOBAL_SOLUTION_ARR)):
-                currentVal = GLOBAL_SOLUTION_ARR[i]
-                tempArr.append(Gene(currentVal, max_mutation=INITIAL_MUTATION).gene_value)
-            
-            self.population.append(Chromo(parent=tempArr))
-            print("Current Population Member: %s" % str(tempArr))
 
 
-generation1 = Population(10)
-par1 = generation1.population[0]
-par2 = generation1.population[1]
+        self.qCVal = []
+        self.qWVal = []
+        self.qSVal = []
+        self.qMVal = []
 
-child = geneticAlg.crossOver(par1, par2)
-print(child.exportToArr())
+        self.fitnessVal = []
 
-                
+        self.valueMapper = {
+            0: self.qCVal,
+            1: self.qWVal,
+            2: self.qSVal,
+            3: self.qMVal
+        }
+
+        self.qCModel = LGModel(self.qCVal, self.fitnessVal)
+        self.qWModel = LGModel(self.qWVal, self.fitnessVal)
+        self.qSModel = LGModel(self.qSVal, self.fitnessVal)
+        self.qMModel = LGModel(self.qMVal, self.fitnessVal)
+
+    def retrain(self):
+        self.qCModel = LGModel(self.qCVal, self.fitnessVal)
+        self.qWModel = LGModel(self.qWVal, self.fitnessVal)
+        self.qSModel = LGModel(self.qSVal, self.fitnessVal)
+        self.qMModel = LGModel(self.qMVal, self.fitnessVal)
+
+    def GeneAssignment(self):
+        tempArr = []
+        for i in range(len(GLOBAL_SOLUTION_ARR)):
+            currentVal = GLOBAL_SOLUTION_ARR[i]
+            tempGene = Gene(currentVal, max_mutation=GENE_MUTATION_MAP.get(i))
+            tempArr.append(tempGene.gene_value)
+            self.valueMapper.get(i).append(tempGene.gene_value)
+        
+        return tempArr
+    
+    def parseFitness(self):
+        for obj in range(len(self.population)):
+            currentObj = self.population[obj]
+            try:
+                if(self.fitnessVal[obj] == currentObj):
+                    pass
+                else:
+                    self.fitnessVal.append(currentObj.fitness)
+            except IndexError:
+                pass
+
+    def createIndividual(self):
+        # create individual
+        tempArr = self.GeneAssignment()
+        print("Population Member: %s" % (str(tempArr)))
+        self.population.append(Chromo(parent=tempArr))
+
+        self.parseFitness()
+        self.retrain()
+
+
+GEN1 = Population()
+GEN1.createIndividual()
+
+
+    
