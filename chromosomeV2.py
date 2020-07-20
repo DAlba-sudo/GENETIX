@@ -63,6 +63,8 @@ class Chromo:
                     raise Exception("Something went wrong! Parent parameter must be array or Chromo type")
         
         self.fitness = None
+        self.sweetFit = None
+        self.bitterFit = None
 
 
     def inheritFromParent(self, parent):

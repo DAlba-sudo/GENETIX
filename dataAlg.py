@@ -43,13 +43,13 @@ GENE_MUTATION_MAP = {
 class LGModel:
     def __init__(self, train_x, train_y):
         self.LGM = linear_model.LinearRegression()
-        self.train_x = train_x
-        self.train_y = train_y
+        self.train_x = np.array(train_x)
+        self.train_y = np.array(train_y)
 
     def trainModel(self):
-        self.LGM.fit(self.train_x, self.train_y)
+        self.LGM.fit(self.train_x.reshape(-1, 1), self.train_y)
 
-    def predict(x):
+    def predict(self, x):
         return self.LGM.predict(x)
 
 class Population:
@@ -77,10 +77,10 @@ class Population:
         self.qMModel = LGModel(self.qMVal, self.fitnessVal)
 
     def retrain(self):
-        self.qCModel = LGModel(self.qCVal, self.fitnessVal)
-        self.qWModel = LGModel(self.qWVal, self.fitnessVal)
-        self.qSModel = LGModel(self.qSVal, self.fitnessVal)
-        self.qMModel = LGModel(self.qMVal, self.fitnessVal)
+        self.qCModel.trainModel()
+        self.qWModel.trainModel()
+        self.qSModel.trainModel()
+        self.qMModel.trainModel()
 
     def GeneAssignment(self):
         tempArr = []
@@ -89,32 +89,57 @@ class Population:
             tempGene = Gene(currentVal, max_mutation=GENE_MUTATION_MAP.get(i))
             tempArr.append(tempGene.gene_value)
             self.valueMapper.get(i).append(tempGene.gene_value)
-        
+
+        print(len(self.qCVal))        
         return tempArr
     
     def parseFitness(self):
         for obj in range(len(self.population)):
             currentObj = self.population[obj]
             try:
-                if(self.fitnessVal[obj] == currentObj):
+                if(self.fitnessVal[obj] == currentObj.fitness):
                     pass
                 else:
                     self.fitnessVal.append(currentObj.fitness)
             except IndexError:
-                pass
+                self.fitnessVal.append(currentObj.fitness)
 
-    def createIndividual(self):
+    def createIndividual(self, recipe, genFit, sweetFit, bitterFit):
         # create individual
-        tempArr = self.GeneAssignment()
+        tempArr = recipe
+        print("\n")
         print("Population Member: %s" % (str(tempArr)))
-        self.population.append(Chromo(parent=tempArr))
+
+        tempChromosome = Chromo(parent=tempArr)
+        tempChromosome.fitness = genFit
+        tempChromosome.sweetFit = sweetFit
+        tempChromosome.bitterFit = bitterFit
+
+        self.population.append(tempChromosome)
 
         self.parseFitness()
         self.retrain()
 
+    def recipeRequested(self):
+        recipe = self.GeneAssignment()
+        print("We've generated your recipe: %s" % (str(recipe)))
+        # Do some logic stuff to actually get the recipe and create it 
+
+        # GPIO talk to arduino
+
+        # get fitness
+        print("How would you rate your coffee on the scale of 1 - 10?")
+        generalFitness = input(">>")
+
+        print("How sweet would you rate your coffee on the scale of 1 - 5?")
+        sweetFitness = input(">>")
+
+        print("How bitter would you rate your coffee on the scale of 1 - 5?")
+        bitterFitness = input(">>")
+
+        self.createIndividual(recipe, generalFitness, sweetFitness, bitterFitness)
+
 
 GEN1 = Population()
-GEN1.createIndividual()
-
-
-    
+GEN1.recipeRequested()
+GEN1.qCModel.predict([[27.8]])
