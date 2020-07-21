@@ -1,5 +1,8 @@
 {
     "python.autoComplete.addBrackets": true,
-    "python.autoComplete.extraPaths": ["G:/GENETIX_DEV/GENETIX/venv"],
+    "python.autoComplete.extraPaths": [
+        "G:/GENETIX_DEV/GENETIX/venv"
+    ],
+    "workbench.colorTheme": "Quiet Light",
 
 }
