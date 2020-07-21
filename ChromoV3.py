@@ -101,25 +101,25 @@ class ChromoV3:
         else:
             raise Exception("Corrupt Chromosome Created, procedure aborted.")
 
-        # inherits genomic values from a single parent
-        def inheritFromParent(self, parentChromo):
-            self.qCoffee = parentChromo.qCoffee
-            self.qWater = parentChromo.qWater
-            self.qSugar = parentChromo.qSugar
-            self.qMilk = parentChromo.qMilk
+    # inherits genomic values from a single parent
+    def inheritFromParent(self, parentChromo):
+        self.qCoffee = parentChromo.qCoffee
+        self.qWater = parentChromo.qWater
+        self.qSugar = parentChromo.qSugar
+        self.qMilk = parentChromo.qMilk
 
-        # collects genomic information in the form of an array and creates an individual from that information
-        def translateFromArray(self, arr):
-            self.qCoffee = arr[0]
-            self.qWater = arr[1]
-            self.qSugar = arr[2]
-            self.qMilk = arr[3]
-            try:
-                self.fitness = arr[4]
-            except IndexError:
-                pass
-        
-        # translates current genomic information to an array
-        def translateToArray(self):
-            return [self.qCoffee, self.qWater, self.qSugar, self.qMilk]           
+    # collects genomic information in the form of an array and creates an individual from that information
+    def translateFromArray(self, arr):
+        self.qCoffee = arr[0]
+        self.qWater = arr[1]
+        self.qSugar = arr[2]
+        self.qMilk = arr[3]
+        try:
+            self.fitness = arr[4]
+        except IndexError:
+            pass
+    
+    # translates current genomic information to an array
+    def translateToArray(self):
+        return [self.qCoffee, self.qWater, self.qSugar, self.qMilk]           
         

@@ -20,17 +20,20 @@ class LinearRegression:
             self.XDS = x_values
             self.YDS = y_values
         else:
-            raise Exception("Unplanned Scenario: no dataset or dataset subset provided.")
+            pass
 
         if((x_values is None) and (y_values is None)):
             self.XDS = self.extractValues(DS=self.CDS, index=0)
             self.YDS = self.extractValues(DS=self.CDS, index=1)
 
 
-        self.x_mean = np.mean(self.XDS)
-        self.y_mean = np.mean(self.YDS)
+        try:
+            self.x_mean = np.mean(self.XDS)
+            self.y_mean = np.mean(self.YDS)
 
-        self.build_model()
+            self.build_model()
+        except ZeroDivisionError:
+            print("Couldn't build model, zero items in DS")
     
     
     # creates a two dimensional array containing the dataset's values
@@ -63,7 +66,7 @@ class LinearRegression:
         denominator = 0
         for i in range(len(self.XDS)):
             numerator += (self.XDS[i] - self.x_mean) * (self.YDS[i] - self.y_mean)
-            denominator += (self.XDS[i] - self.x_mean) ** 2
+            denominator += np.exp2((self.XDS[i] - self.x_mean))
             
         self.b1 = numerator / denominator
         self.b0 = self.y_mean - (self.b1 * self.x_mean)
