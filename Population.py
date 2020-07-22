@@ -50,10 +50,10 @@ class Population:
     def addIndividual(self, indiv):
         # indiv is assumed to be a chromosome
         self.globalPopulation.append(indiv)
-        self.qCValues.append(indiv.qCoffee)
-        self.qWValues.append(indiv.qWater)
-        self.qSValues.append(indiv.qSugar)
-        self.qMValues.append(indiv.qMilk)
+        self.qCValues.append(indiv.qCoffee.value)
+        self.qWValues.append(indiv.qWater.value)
+        self.qSValues.append(indiv.qSugar.value)
+        self.qMValues.append(indiv.qMilk.value)
         self.general_fitness.append(indiv.fitness)
 
         self.qCModel = LinearRegression(x_values=self.qCValues, y_values=self.general_fitness)
@@ -63,14 +63,17 @@ class Population:
 
         for model in range(len(self.MODEL_MAPPER)):
             if(model == 0):
-                pass
+                self.qCModel.build_model()
+                self.COFFEE_MUTATION = self.qCModel.b1
             if(model == 1):
-                pass
+                self.qWModel.build_model()
+                self.WATER_MUTATION = self.qWModel.b1
             if(model == 2):
                 self.qSModel.build_model()
                 self.SUGAR_MUTATION = self.qSModel.b1
             if(model == 3):
-                pass
+                self.qMModel.build_model()
+                self.MILK_MUTATION = self.qMModel.b1
 
 
 chromo1 = ChromoV3(array=[0.08, .226, 7.21, 2.15, .3])
@@ -80,16 +83,14 @@ chromo4 = ChromoV3(array=[0.08, .226, 4.9, 21.5, .8])
 chromo5 = ChromoV3(array=[0.08, .226, 2.9, 21.5, .7])
 chromo6 = ChromoV3(array=[0.08, .226, 3.9, 21.5, .9])
 
-GEN1 = Population()
-GEN1.addIndividual(chromo1)
-print("SUGAR Mutation %s" % GEN1.SUGAR_MUTATION)
-GEN1.addIndividual(chromo2)
-print("SUGAR Mutation %s" % GEN1.SUGAR_MUTATION)
-GEN1.addIndividual(chromo3)
-print("SUGAR Mutation %s" % GEN1.SUGAR_MUTATION)
-GEN1.addIndividual(chromo4)
-print("SUGAR Mutation %s" % GEN1.SUGAR_MUTATION)
-GEN1.addIndividual(chromo5)
-print("SUGAR Mutation %s" % GEN1.SUGAR_MUTATION)
-GEN1.addIndividual(chromo6)
-print("SUGAR Mutation %s" % GEN1.SUGAR_MUTATION)
+# Example Init of above class
+
+# GEN1 = Population()
+# GEN1.addIndividual(chromo1)
+# print("\n")
+# print("Coffee Mutation %s" % GEN1.COFFEE_MUTATION)
+# print("Water Mutation %s" % GEN1.WATER_MUTATION)
+# print("Sugar Mutation %s" % GEN1.SUGAR_MUTATION)
+# print("Milk Mutation %s" % GEN1.MILK_MUTATION)
+
+

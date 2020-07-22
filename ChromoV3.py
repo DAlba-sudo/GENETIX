@@ -43,20 +43,22 @@ class Gene:
 
     # checks to see if an item is within a min and max range
     def within(self, randFloat, min_range, max_range):
-        minTest = False
-        maxTest = False
-        if(randFloat < max_range):
-            maxTest = True
-        if(randFloat > min_range):
-            minTest = True
+        return ((randFloat<max_range) and (randFloat>min_range))
+
+    def rangeClip(self, itm, min_range, max_range):
+        if(itm < min_range):
+            itm = min_range
+        if(itm > max_range):
+            itm = max_range
         
-        return minTest and maxTest
+        return itm
 
     # Used for incorporating a bias to the selection process (add or subtraction)
     def arrayRandSelector(self, arr, bias=None):
         len_arr = len(arr)
         if(bias is not None):
             randFloat = random.random() + bias
+            randFloat = self.rangeClip(randFloat, 0.0, 1.0)
         else:
             randFloat = random.random()
         for index in range(len_arr):
@@ -66,8 +68,8 @@ class Gene:
 
             if(self.within(randFloat, min_range, max_range)):
                 return index
-            else:
-                pass
+        
+        return 0
 
 
     # sets the value of the gene accounting for slight adaption techniques
