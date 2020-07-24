@@ -112,10 +112,10 @@ class ChromoV3:
 
     # collects genomic information in the form of an array and creates an individual from that information
     def translateFromArray(self, arr):
-        self.qCoffee = arr[0]
-        self.qWater = arr[1]
-        self.qSugar = arr[2]
-        self.qMilk = arr[3]
+        self.qCoffee = Gene(arr[0])
+        self.qWater = Gene(arr[1])
+        self.qSugar = Gene(arr[2])
+        self.qMilk = Gene(arr[3])
         try:
             self.fitness = arr[4]
         except IndexError:
@@ -123,5 +123,5 @@ class ChromoV3:
     
     # translates current genomic information to an array
     def translateToArray(self):
-        return [self.qCoffee, self.qWater, self.qSugar, self.qMilk]           
+        return [self.qCoffee.value, self.qWater.value, self.qSugar.value, self.qMilk.value]           
         

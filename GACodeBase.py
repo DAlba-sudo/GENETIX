@@ -1,6 +1,6 @@
 from random import randint
-from chromosomeV2 import Chromo
-from chromosomeV2 import Gene
+from ChromoV3 import ChromoV3 as Chromo
+from ChromoV3 import Gene
 
 class GA:
     def __init__(self):
