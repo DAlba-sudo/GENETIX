@@ -1,8 +1,29 @@
 #:kivy 2.0
-<Button>:
-    size_hint:0.2, 0.3
+# Label:
+#     text_size: root.width, None
+#     size: self.texture_size
 
 <GENETIX>:
-    Button:
-        background_normal: 'logofp.png'
-        background_down: 'logofp.png'
+    orientation: 'vertical'
+    Label:
+        id: welcomeLbl
+        text: 'Welcome to GENETIX'
+        color: [1, 0, 0, 1]
+        text_size: self.size
+        font_size: '50sp'
+        valign: 'center'
+        halign: 'center'
+    
+    GridLayout:
+        cols: 2
+
+        Button:
+            text: "Coffee"
+            background_color: 1, 0, 0, 1
+            on_press: root.create_individual()
+
+        Button:
+            text: "Chocolate Milk"
+
+    ActionBar:
+    

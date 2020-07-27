@@ -8,6 +8,12 @@ from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.button import Button
+from kivy.uix.image import Image
+from kivy.animation import Animation 
+from kivy.uix.label import Label
+from kivy.uix.boxlayout import BoxLayout
+
 
 Window.clearcolor = (1, 1, 1, 1)
 
@@ -41,10 +47,20 @@ with open(POPULATION, "r") as f:
     
     ENVIRON.updateData()
 
-class GENETIX(FloatLayout):
-    pass
+class GENETIX(BoxLayout):
+    def create_individual(self):
+        # step 1: generate recipe (slight adaption)
+
+        # step 2: use arduino to create recipe
+
+        # step 3: get recipe feedback
+
+        # step 4: save data
+        pass
+    
 
 class GenetixApp(App):
+
     def build(self):
         return GENETIX()
 
