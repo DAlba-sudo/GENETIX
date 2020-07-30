@@ -22,11 +22,11 @@ class Gene:
         if(max_mutation is not None):
             tempMutation = max_mutation
         else:
-            tempMutation = 0.10
+            tempMutation = 0.15
         self.MAX_MUTATION = tempMutation
 
         # sets the adaption factor / value
-        if(slightAdaption is not None):
+        if((slightAdaption is not None) and (slightAdaption is not False)):
             # we want to include a mutation
             tempVal = self.setVal(value)
         else:
@@ -111,17 +111,29 @@ class ChromoV3:
         self.qMilk = parentChromo.qMilk
 
     # collects genomic information in the form of an array and creates an individual from that information
-    def translateFromArray(self, arr):
-        self.qCoffee = Gene(arr[0])
-        self.qWater = Gene(arr[1])
-        self.qSugar = Gene(arr[2])
-        self.qMilk = Gene(arr[3])
-        try:
-            self.fitness = arr[4]
-        except IndexError:
-            pass
+    def translateFromArray(self, arr, slightAdaption=None):
+        if((slightAdaption is not None) and (slightAdaption is not False)):
+            self.qCoffee = Gene(arr[0], slightAdaption=True)
+            self.qWater = Gene(arr[1], slightAdaption=True)
+            self.qSugar = Gene(arr[2], slightAdaption=True)
+            self.qMilk = Gene(arr[3], slightAdaption=True)
+            try:
+                self.fitness = arr[4]
+            except IndexError:
+                pass
+        else:
+            self.qCoffee = Gene(arr[0])
+            self.qWater = Gene(arr[1])
+            self.qSugar = Gene(arr[2])
+            self.qMilk = Gene(arr[3])
+            try:
+                self.fitness = arr[4]
+            except IndexError:
+                pass
     
     # translates current genomic information to an array
     def translateToArray(self):
         return [self.qCoffee.value, self.qWater.value, self.qSugar.value, self.qMilk.value]           
-        
+
+    def translateToArrayFit(self):
+        return [self.qCoffee.value, self.qWater.value, self.qSugar.value, self.qMilk.value, self.fitness]

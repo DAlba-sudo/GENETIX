@@ -1,0 +1,7 @@
+STND   : 35dag : 3.0dag : 0dag : 0dag : 10
+
+TRIAL 1: 28dag : 2.4dag : 0dag : 0dag
+TRIAL 2: 42dag : 3.6dag : 0dag : 0dag
+Trial 3: 28dag : 3.6dag : 0dag : 0dag
+TRIAL 4: 42dag : 2.4dag : 0dag : 0dag
+

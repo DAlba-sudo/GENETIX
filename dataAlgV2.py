@@ -16,22 +16,15 @@ CHGeneral = Chromo(array=general_solution)
 GENERON.addIndividual(CHGeneral)
 
 
-def create_recipe():
+def create_recipe(slightAdaption, max_mutation):
     # Most Recent Member
-    MRM = GENERON.globalPopulation[(len(GENERON.globalPopulation)-1)]
-    tempCoffee = Gene(MRM.qCoffee.value, max_mutation=0.3, slightAdaption=True)
-    tempWater = Gene(MRM.qWater.value, max_mutation=0.3, slightAdaption=True)
-    tempSugar = Gene(MRM.qSugar.value, max_mutation=0.3, slightAdaption=True)
-    tempMilk = Gene(MRM.qMilk.value, max_mutation=0.3, slightAdaption=True)
-
-    # create the recipe IRL
-    # arduinoStuff()
-
-    # get fitness 
-    fitness = input("How was the recipe?")
-    fitness = int(fitness)
+    MRM = ENVIRON.globalPopulation[(len(ENVIRON.globalPopulation)-1)]
+    tempCoffee = Gene(MRM.qCoffee.value, max_mutation=max_mutation, slightAdaption=slightAdaption)
+    tempWater = Gene(MRM.qWater.value, max_mutation=max_mutation, slightAdaption=slightAdaption)
+    tempSugar = Gene(MRM.qSugar.value, max_mutation=max_mutation, slightAdaption=slightAdaption)
+    tempMilk = Gene(MRM.qMilk.value, max_mutation=max_mutation, slightAdaption=slightAdaption)
     
     tempArray = [tempCoffee, tempWater, tempSugar, tempMilk, fitness]
     tempChromo = Chromo(tempArray)
 
-    GENERON.addIndividual(tempChromo)
+    return tempChromo

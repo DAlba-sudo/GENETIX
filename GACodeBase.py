@@ -11,8 +11,8 @@ class GA:
 
     def crossOver(self, chromo1, chromo2):
         #select crossOver point
-        chromo1_arr = chromo1.exportToArr(chromo1)
-        chromo2_arr = chromo2.exportToArr(chromo2)
+        chromo1_arr = chromo1.translateToArray()
+        chromo2_arr = chromo2.translateToArray()
 
         crossPoint = self.selectCrossOverPoint(len(chromo1_arr))
 
@@ -36,5 +36,5 @@ class GA:
             childPre = preSplit2
             childPost = postSplit1
 
-        child = Chromo(parent=(childPre + childPost))
-        return child
+        child = Chromo(array=(childPre + childPost))
+        return child.translateToArray()

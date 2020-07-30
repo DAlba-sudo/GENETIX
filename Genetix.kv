@@ -4,26 +4,27 @@
 #     size: self.texture_size
 
 <GENETIX>:
-    orientation: 'vertical'
-    Label:
-        id: welcomeLbl
-        text: 'Welcome to GENETIX'
-        color: [1, 0, 0, 1]
-        text_size: self.size
-        font_size: '50sp'
-        valign: 'center'
-        halign: 'center'
-    
-    GridLayout:
-        cols: 2
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            id: welcomeLbl
+            text: 'Welcome to GENETIX'
+            color: [1, 0, 0, 1]
+            text_size: self.size
+            font_size: '50sp'
+            valign: 'center'
+            halign: 'center'
+        
+        GridLayout:
+            cols: 2
 
-        Button:
-            text: "Coffee"
-            background_color: 1, 0, 0, 1
-            on_press: root.create_individual()
+            Button:
+                text: "Coffee"
+                background_color: 1, 0, 0, 1
+                on_press: root.create_individual()
 
-        Button:
-            text: "Chocolate Milk"
+            Button:
+                text: "Chocolate Milk"
 
-    ActionBar:
+        ActionBar:
     
