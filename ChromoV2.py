@@ -231,8 +231,33 @@ class Population:
         # returns a tuple
         return P1, P2
         
+    # inverse fitness selection for deletion
     def replaceForDeath(self):
-        pass
+        fit_sum = self.fitSum()
+
+        iFit = 0
+
+        for indiv in range(self.lenPopulation()):
+            current_indiv = self.population[indiv]
+            current_indiv_fitness = current_indiv.getFit()
+
+            rel_fit = current_indiv_fitness / fit_sum
+            inverse_rel_fit = 1 / rel_fit
+            iFit += inverse_rel_fit
+
+        pointer = random.random()
+        for itm in range(self.lenPopulation()):
+            current_indiv = self.population[indiv]
+            current_indiv_fitness = current_indiv.getFit()
+
+            rel_fit = current_indiv_fitness / fit_sum
+            inverse_rel_fit = 1 / rel_fit
+            adjusted_inverse_rel_fit = inverse_rel_fit / iFit
+
+            if ( pointer < adjusted_inverse_rel_fit ):
+                return itm # returns the index of the member of the population that will be replaced
+            else:
+                pass
 
     def isInArray(self, x, array):
         flag = False
