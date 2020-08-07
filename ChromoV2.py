@@ -3,6 +3,8 @@ import random
 from operator import add, sub
 from math import floor
 import copy
+import numpy as np
+import sklearn
 
 class Allele:
 
@@ -285,12 +287,39 @@ class Population:
                 pass
 
             len_testQueue = len(self.testQueue)
+
+    def GENE_VALUES(self):
+        coffee = []
+        sugar = []
+        
+        for i in range(self.lenPopulation()):
+            current_i = self.population[i]
+            arr = current_i.geneArray()
+            coffee.append(arr[0])
+            sugar.append(arr[1])
+
+        return coffee, sugar
+
+    def getAllFitness(self):
+        arr = []
+        for i in range(self.lenPopulation()):
+            current_i = self.population[i]
+            fit_ = current_i.getFit()
+            arr.append(fit_)
+
+        return arr
             
+    
     def fitEntirePopluation(self):
         pass
 
     def fitModel(self):
-        pass
+        x1, x2 = self.GENE_VALUES()
+        X = np.array([x1, x2])
+        fitness = self.getAllFitness()
+        vector = np.array(fitness)
+
+        poly = np.
 
 if __name__ == "__main__":
     GA = Population(100)
