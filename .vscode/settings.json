@@ -1,3 +1,4 @@
 {
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "python.pythonPath": "g:\\GENETIX_DEV\\GENETIX\\venv\\Scripts\\python.exe"
 }

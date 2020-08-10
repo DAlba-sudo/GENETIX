@@ -179,6 +179,10 @@ class Population:
 
     def __init__(self, nCap):
         self.size = nCap
+        self.DIR = "DATA\\"
+        self.avgFitPop = 0
+
+        # Necessary Arrays
         self.population = []
         self.testQueue = []
         self.deadIndividuals = []
@@ -186,7 +190,7 @@ class Population:
 
         # directory information
         self.BASE_PATH = os.path.dirname(__file__)
-        self.DATA_FOLDER = os.path.join(self.BASE_PATH, "DATA/")
+        self.DATA_FOLDER = os.path.join(self.BASE_PATH, "DATA\\")
 
         # file information
         self.STEADY_POPULATION = os.path.join(self.DATA_FOLDER, "STEADY_POPULATION.txt")
@@ -197,6 +201,28 @@ class Population:
 
         self.SELECT_FOR_TESTING = 0.25
         self.REPLACE = 0.34
+
+    def updateFilePaths(self):
+        self.STEADY_POPULATION = os.path.join(self.DATA_FOLDER, "STEADY_POPULATION.txt")
+        self.TEST_QUEUE = os.path.join(self.DATA_FOLDER, "TEST_QUEUE.txt")
+        self.CEMENTARY = os.path.join(self.DATA_FOLDER, "CEMENTARY.txt")
+        self.GLOBAL_POPULATION = os.path.join(self.DATA_FOLDER, "GLOBAL_POPULATION.txt")
+        self.BUILD_QUEUE = os.path.join(self.DATA_FOLDER, "BUILD.txt")
+
+        while True:
+            try:
+                self.openFile(self.STEADY_POPULATION)
+                self.openFile(self.TEST_QUEUE)
+                self.openFile(self.CEMENTARY)
+                self.openFile(self.GLOBAL_POPULATION)
+                self.openFile(self.BUILD_QUEUE)
+                break
+            except FileNotFoundError:
+                pass
+        
+    def openFile(self, file):
+        with open(file, "a+") as f:
+            f.close()
 
     def clearFile(self, path):
         with open(path, "w+") as f:
@@ -246,6 +272,36 @@ class Population:
 
         tempChildChromo.importFromAllele(tempChild)
         return tempChildChromo
+
+    def avgFitSum(self):
+        fitSum = 0
+        count = 0
+        fitArr = []
+        for indiv in range(self.lenPopulation()):
+            current_indiv = self.population[indiv]
+            current_fit = current_indiv.getFit()
+            if(current_fit is not None):
+                fitArr.append(current_fit)
+                fitSum += current_fit
+                count += 1
+            else:
+                pass
+        q1 = np.quantile(fitArr, 0.25)
+        q3 = np.quantile(fitArr, 0.75)
+        IQR = q3 - q1
+        lowerBound = q1 - (1.5 * IQR)
+        upperBound = q3 + (1.5 * IQR)
+
+        newFitArr = []
+        for fit in range(len(fitArr)):
+            current_f = fitArr[fit]
+            if ((current_f < lowerBound) or (current_f > upperBound)):
+                pass
+            else:
+                newFitArr.append(current_f)
+
+        avgFit = np.average(newFitArr)
+        return avgFit
 
     def fitSum(self):
         fitSum = 0
@@ -497,7 +553,30 @@ class Population:
                 data.append(i_info)
         
             f.writelines(data)
-    
+
+    def migrateData(self, DIR1):
+        # create DIR if not already existing
+        while True:
+            self.DIR = DIR1
+            DATA_FOLDER = os.path.join(self.BASE_PATH, str(str(self.DIR) + "\\"))
+            try:
+                os.mkdir(str(DATA_FOLDER))
+                break
+            except FileExistsError:
+                break
+        self.DATA_FOLDER = DATA_FOLDER
+        self.updateFilePaths()
+
+        # load in current steady population
+        GA.importChromosomeIntoArray(GA.STEADY_POPULATION, GA.population)          
+
+        # load in testQueue
+        GA.importChromosomeIntoArray(GA.TEST_QUEUE, GA.testQueue)
+
+        # load in buildQueue
+        GA.importChromosomeIntoArray(GA.BUILD_QUEUE, GA.buildQueue)
+        
+
     def importChromosomeIntoArray(self, file, arr):
         
         with open(file, "r") as f:
@@ -511,6 +590,8 @@ class Population:
                     try:
                         value_list.append(float(current_value))
                     except ValueError:
+                        print("Hey there is a value error for this val => " + str(current_value))
+                        input(">>")
                         value_list.append(None)
                 
                 exampleChromo = copy.deepcopy(rootChromo)
@@ -519,7 +600,55 @@ class Population:
             
             
     def performGA(self):
-        for n in range(5):
+        count = 0
+        method = 0
+        itr = 0
+
+        os.system('clear')
+        print("CURRENT WORKING GA => " + str(self.DIR))
+        print("\n")
+        print("What would you like to do?")
+        # Migrate Data
+        print("1) Change GA")
+
+        # Perform GA
+        print("2) Perform GA")
+
+        while True:
+            try:
+                user_input = int(input("\n>> "))
+                break
+            except ValueError:
+                os.system('clear')
+                print("CURRENT WORKING GA => " + str(self.DIR))
+                print("\n")
+                print("What would you like to do?")
+                # Migrate Data
+                print("1) Change GA")
+
+                # Perform GA
+                print("2) Perform GA")
+            
+        if(user_input == 1):
+            os.system('clear')
+            print("What DIR would you like to migrate to?")
+            DIR_DEST = input("\n>>")
+            self.migrateData(DIR_DEST)
+            self.performGA()
+        elif(user_input == 2):
+            os.system('clear')
+            print("How many cycles would you like to do?")
+            count = int(input("\n>>"))
+            print("What method would you like to use?")
+            print("1) auto")
+            print("2) supervised")
+            method = int(input("\n>>"))
+
+        else:
+            pass
+
+        n = 0
+        while (self.avgFitPop < 9.3) and (n < count):
             # random init if empty
             if(self.lenPopulation() == 0):
                 self.randomGenerate()
@@ -530,7 +659,7 @@ class Population:
             if(len(self.testQueue) == 0):
                 # test x% of population
                 self.selectForTesting(floor(self.size*self.SELECT_FOR_TESTING))
-
+                
             # Record Testing Data
             self.writePopulation(self.TEST_QUEUE, self.testQueue)
 
@@ -541,61 +670,108 @@ class Population:
                 mem = 0
 
                 current_mem = self.testQueue[mem]    
-                os.system("clear")            
-                print("There are still individuals in the testQueue that must be tested!")
-                print("Before the GA can continue, you must first assign a fitness to these")
-                print("individuals!")
+                # if method is set to automatic
+                if(method == 1):
+                    # loading in data
+                    qC = current_mem.displayGene("qC")
+                    qS = current_mem.displayGene("qS")
 
-                print("What would you like to do?")
-                print("  1) Assign fitness")
-                print("  2) Exit and Save")
-                try:
-                    opt = int(input(">> "))
-                except ValueError:
-                    os.sys.exit("Not an option, halting GA! Checking data...")
+                    # calculating fitness
+                    prop = (float(qC) / float(qS))
 
-                # Assigning a fitness to the member
-                if(opt == 1):
-                    # Clearing for legibility
-                    os.system("clear")
-                    print(current_mem.geneArray())
-                    while True:
-                        try:
-                            # get the fitness from user
-                            input_fit = float(input("What would you rate this coffee?"))
-                            break
-                        except ValueError:
-                            print("This is not an option! Try Again!")
+                    yFit = ( prop * 10 ) / 1.667
+                    if (yFit > 10):
+                        yFit = (10) + (10 - yFit)
+                    if (yFit < 0.1):
+                        yFit = 0.1
+                    
+                    print("Fitness => " + str(yFit))
 
-                    # updating current members fitness
-                    current_mem.updateFitness(input_fit)
+                    current_mem.updateFitness(yFit)                    
 
                     # Transfering data from testQueue to buildQueue
-                    self.buildQueue.append(current_mem)
-                    self.testQueue.remove(current_mem)
+                    if(current_mem.getFit() is not None):
+                        self.buildQueue.append(current_mem)
+                        self.testQueue.remove(current_mem)
+                    else: 
+                        raise Exception("Ayo we got a NaN problem in 665")
 
                     # save data
                     self.writePopulation(self.BUILD_QUEUE, self.buildQueue)
                     self.writePopulation(self.TEST_QUEUE, self.testQueue)
                     self.writePopulation(self.STEADY_POPULATION)
-                elif(opt == 2):
-                    # saving all our data and exiting
-                    self.writePopulation(self.STEADY_POPULATION)
-                    self.writePopulation(self.TEST_QUEUE, self.testQueue)
-                    self.writePopulation(self.BUILD_QUEUE, self.buildQueue)
-                    os.sys.exit("Halting GA Procedure, data saved! Thanks!")
-                else:
-                    pass
+
+                # # if method is set to supervised
+                # else:
+                #     os.system("clear")     
+                #     print("CURRENT WORKING GA => " + str(self.DIR))
+                #     print("\n")
+
+                #     print("There are still individuals in the testQueue that must be tested!")
+                #     print("Before the GA can continue, you must first assign a fitness to these")
+                #     print("individuals!")
+
+                #     print("What would you like to do?")
+                #     print("  1) Assign fitness")
+                #     print("  2) Exit and Save")
+                #     try:
+                #         opt = int(input(">> "))
+                #     except ValueError:
+                #         os.sys.exit("Not an option, halting GA! Checking data...")
+
+                #     # Assigning a fitness to the member
+                #     if(opt == 1):
+                #         # Clearing for legibility
+                #         os.system("clear")
+                #         print(current_mem.geneArray())
+                #         while True:
+                #             try:
+                #                 # get the fitness from user
+                #                 input_fit = float(input("What would you rate this coffee?"))
+                #                 break
+                #             except ValueError:
+                #                 print("This is not an option! Try Again!")
+
+                #         # updating current members fitness
+                #         current_mem.updateFitness(input_fit)
+
+                #         # Transfering data from testQueue to buildQueue
+                #         self.buildQueue.append(current_mem)
+                #         self.testQueue.remove(current_mem)
+
+                #         # save data
+                #         self.writePopulation(self.BUILD_QUEUE, self.buildQueue)
+                #         self.writePopulation(self.TEST_QUEUE, self.testQueue)
+                #         self.writePopulation(self.STEADY_POPULATION)
+                #     elif(opt == 2):
+                #         # saving all our data and exiting
+                #         self.writePopulation(self.STEADY_POPULATION)
+                #         self.writePopulation(self.TEST_QUEUE, self.testQueue)
+                #         self.writePopulation(self.BUILD_QUEUE, self.buildQueue)
+                #         os.sys.exit("Halting GA Procedure, data saved! Thanks!")
+                #     else:
+                #         pass
 
             self.writePopulation(self.TEST_QUEUE, self.testQueue)
             self.writePopulation(self.BUILD_QUEUE, self.buildQueue)
             self.writePopulation(self.STEADY_POPULATION)    
 
+            # members of buildQueue that have no fitness
+            blacklist = []
+
             # preparing data from buildQueue for model training
             for itm in range(len(self.buildQueue)):
                 current_itm = self.buildQueue[itm]
-                fit_arr.append(current_itm.getFit())
-            
+                if current_itm.getFit() is not None:
+                    fit_arr.append(current_itm.getFit())
+                else:
+                    blacklist.append(current_itm)
+
+            # remove members of buildQueue that have no fitness from blacklist
+            for bl in range(len(blacklist)):
+                current_bl = blacklist[bl]
+                self.buildQueue.remove(current_bl)
+
             x1, x2 = self.GENE_VALUES()
 
 
@@ -607,10 +783,30 @@ class Population:
 
             # Record Fitness of Population
             self.writePopulation(self.STEADY_POPULATION)
+
+            # Record Intermediate Population
+            while True:
+                try:
+                    tempSteady = os.path.join(self.DATA_FOLDER, str("tempSteady%s.txt" % (str(itr))))
+                    tempBuild = os.path.join(self.DATA_FOLDER, str("tempBuild%s.txt" % (str(itr))))
+                    tempTest = os.path.join(self.DATA_FOLDER, str("tempTest%s.txt" % (str(itr))))
+                    tempCementary = os.path.join(self.DATA_FOLDER, str("tempCementary%s.txt" % (str(itr))))
+
+                    self.writePopulation(tempSteady)
+                    self.writePopulation(tempBuild, self.buildQueue)
+                    self.writePopulation(tempTest, self.testQueue)
+                    self.writePopulation(tempCementary, self.deadIndividuals)
+                    itr += 1
+                    break
+                except FileNotFoundError:
+                    self.openFile(tempSteady)
+                    self.openFile(tempBuild)
+                    self.openFile(tempTest)
+                    self.openFile(tempCementary)
+
             print("------------------------------------------------------------")
             print("Data is about to change drastically, press enter when ready!")
             print("------------------------------------------------------------")
-            input(">>")
 
             for j in range(floor(self.size*self.REPLACE)):
                 # Parent Selection
@@ -638,9 +834,13 @@ class Population:
 
             self.writePopulation(self.STEADY_POPULATION)
             self.writePopulation(self.TEST_QUEUE, self.testQueue)
+            self.writePopulation(self.BUILD_QUEUE, self.buildQueue)
+
+            self.avgFitPop = self.avgFitSum()
 
             # TELEMETRY / LOGGING
-            print("-------GENERATION-------")
+            n += 1
+            print("-------GENERATION %s-------" % (str(n)))
             GA.displayPopulation()
             print("\n")
 
@@ -648,20 +848,14 @@ class Population:
 
 
 if __name__ == "__main__":
-    GA = Population(70)
+    GA = Population(160)
+    GA.SELECT_FOR_TESTING = 0.4
+    GA.REPLACE = 0.37
     rootChromo = Chromosome()
     rootChromo.line = 1
     rootChromo.addGene("qC", 30)
     rootChromo.addGene("qS", 12)
     GA.addRoot(rootChromo)
 
-    # load in current steady population
-    GA.importChromosomeIntoArray(GA.STEADY_POPULATION, GA.population)          
-
-    # load in testQueue
-    GA.importChromosomeIntoArray(GA.TEST_QUEUE, GA.testQueue)
-
-    # load in buildQueue
-    GA.importChromosomeIntoArray(GA.BUILD_QUEUE, GA.buildQueue)
 
     GA.performGA()
