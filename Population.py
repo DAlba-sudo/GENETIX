@@ -20,31 +20,6 @@ class Population:
         }
 
         self.fh = FileHandler()
-    
-
-    
-    # this currently serves as our function to export data to the population.txt file
-    # def exportPopulationToArray(self, path=None):
-    #     tempArray = [] # tempArray holds our temporary population
-
-    #     # iterates through each member of our current population
-    #     for member in range(len(self.population_members)):
-    #         current_member = self.population_members[member]
-            
-    #         tempMember = current_member.exportGeneToArray()
-
-    #         # writes to the file
-    #         try:
-    #             if(path is not None):
-    #                 with open(self.PATHS[path], "a+") as f:
-    #                     f.write(str(tempMember) + "\n")
-    #                     f.flush()
-    #             else:
-    #                 with open(self.PATHS['default'], "a+") as f:
-    #                     f.write(str(tempMember) + "\n")
-    #                     f.flush()
-    #         except KeyError:
-    #             self.PATHS[path] = os.path.join(self.DATA_FOLDER_PATH, (str(path) + ".txt"))
 
     # Defines rules for creating members of the population (Must be overwritten)
     def createMember(self):
@@ -147,7 +122,7 @@ class Generation(Population):
     
 # Example of how it can be used!
 if __name__ == "__main__":
-    g = Generation(100)
+    g = Generation(10)
     g.createPopulation(method="ASEXUAL")
     g.stochasticSelection(37)
     g.fh.exportToPath(path="TEST2", population=g.population_members)

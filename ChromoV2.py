@@ -180,7 +180,7 @@ class Population:
     def __init__(self, nCap):
         self.size = nCap
         self.DIR = "DATA\\"
-        self.avgFitPop = 0
+        self.avgFitPop = 0.0
 
         # Necessary Arrays
         self.population = []
@@ -268,7 +268,6 @@ class Population:
             else:
                 tempChild.append(P2_current_allele)
 
-        print("Crossover Results: " + str(tempChild))
 
         tempChildChromo.importFromAllele(tempChild)
         return tempChildChromo
@@ -567,68 +566,114 @@ class Population:
         self.DATA_FOLDER = DATA_FOLDER
         self.updateFilePaths()
 
+        self.population = []
+        self.testQueue = []
+        self.buildQueue = []
+
+
         # load in current steady population
-        GA.importChromosomeIntoArray(GA.STEADY_POPULATION, GA.population)          
+        self.importChromosomeIntoArray(self.STEADY_POPULATION, self.population)          
 
         # load in testQueue
-        GA.importChromosomeIntoArray(GA.TEST_QUEUE, GA.testQueue)
+        self.importChromosomeIntoArray(self.TEST_QUEUE, self.testQueue)
 
         # load in buildQueue
-        GA.importChromosomeIntoArray(GA.BUILD_QUEUE, GA.buildQueue)
+        self.importChromosomeIntoArray(self.BUILD_QUEUE, self.buildQueue)
         
 
     def importChromosomeIntoArray(self, file, arr):
-        
-        with open(file, "r") as f:
-            data = f.readlines()
+        try:
+            with open(file, "r") as f:
+                data = f.readlines()
 
-            for d in range(len(data)):
-                value_list = []
-                current_data = data[d].strip('\n').split(",")
-                for v in range(len(current_data)):
-                    current_value = current_data[v]
-                    try:
-                        value_list.append(float(current_value))
-                    except ValueError:
-                        print("Hey there is a value error for this val => " + str(current_value))
-                        input(">>")
-                        value_list.append(None)
-                
-                exampleChromo = copy.deepcopy(rootChromo)
-                exampleChromo.importFromFileData(value_list)
-                arr.append(exampleChromo)
+                for d in range(len(data)):
+                    value_list = []
+                    current_data = data[d].strip('\n').split(",")
+                    for v in range(len(current_data)):
+                        current_value = current_data[v]
+                        try:
+                            value_list.append(float(current_value))
+                        except ValueError:
+                            value_list.append(None)
+                    
+                    exampleChromo = copy.deepcopy(self.root)
+                    exampleChromo.importFromFileData(value_list)
+                    arr.append(exampleChromo)
+        except FileNotFoundError:
+            pass
+        
+    def randomSelection(self):
+        choice = random.choice(self.population)
+        for itm in range(self.lenPopulation()):
+            if self.population[itm] == choice:
+                return itm
+            else:
+                pass
+        
+        return -1
+    
+    def variate(self, x, pm):
+        variation = (pm * random.random())
+        ops = [add, sub]
+        op = random.choice(ops)
+        val = op(x, (x*variation))
+        return val
             
-            
-    def performGA(self):
+    def performGA(self, var=None, rand_select=None, pT=None, pR=None):
         count = 0
         method = 0
         itr = 0
 
-        os.system('clear')
-        print("CURRENT WORKING GA => " + str(self.DIR))
-        print("\n")
-        print("What would you like to do?")
-        # Migrate Data
-        print("1) Change GA")
+        # os.system('clear')
+        # print("CURRENT WORKING GA => " + str(self.DIR))
+        # print("\n")
+        # print("What would you like to do?")
+        # # Migrate Data
+        # print("1) Change GA")
 
-        # Perform GA
-        print("2) Perform GA")
+        # # Perform GA
+        # print("2) Perform GA")
 
-        while True:
-            try:
-                user_input = int(input("\n>> "))
-                break
-            except ValueError:
-                os.system('clear')
-                print("CURRENT WORKING GA => " + str(self.DIR))
-                print("\n")
-                print("What would you like to do?")
-                # Migrate Data
-                print("1) Change GA")
+        # #Analyze Population
+        # print("3) Analyze Population")
 
-                # Perform GA
-                print("2) Perform GA")
+        # while True:
+        #     try:
+        #         user_input = int(input("\n>> "))
+        #         break
+        #     except ValueError:
+        #         os.system('clear')
+        #         print("CURRENT WORKING GA => " + str(self.DIR))
+        #         print("\n")
+        #         print("What would you like to do?")
+        #         # Migrate Data
+        #         print("1) Change GA")
+
+        #         # Perform GA
+        #         print("2) Perform GA")
+
+        user_input = 2
+        
+        if(pT is not None) and (pR is not None):
+            isVar = False
+            isRan = False
+            if(var == 1):
+                isVar = True
+            if(rand_select == 1):
+                isRan = True
             
+            ending = ""
+            newEnding = ""
+            if(isVar):
+                ending += "var"
+            if(isRan):
+                ending += "-ran"
+
+            if(len(ending) > 2):
+                newEnding = "(" + ending + ")" 
+            
+            data_path = "%s-%s%s" % (str(pT), str(pR), str(ending))
+            self.migrateData(data_path)
         if(user_input == 1):
             os.system('clear')
             print("What DIR would you like to migrate to?")
@@ -636,19 +681,80 @@ class Population:
             self.migrateData(DIR_DEST)
             self.performGA()
         elif(user_input == 2):
+            count = 50
+            method = 1
+            
+            if(var is None):
+                os.system('clear')
+                print("Would you like variation turned on? y(1)/n(0)")
+                variation = int(input(">>"))
+            else:
+                variation = var
+        
+            if(rand_select is None):
+                os.system('clear')
+                print("Would you like random replacement turned on? y(1)/n(0)")
+                rand_replacement = int(input(">>"))
+            else:
+                rand_replacement = rand_select
+            if(pT is None):
+                os.system('clear')
+                print("What would you like the training percentage to be?")
+                self.SELECT_FOR_TESTING = float(input(">>"))
+            else:
+                self.SELECT_FOR_TESTING = pT
+            if(pR is None):
+                os.system('clear')
+                print("What would you like the generation gap to be?")
+                self.REPLACE = float(input(">>"))
+            else:
+                self.REPLACE = pT
+            
+
+        elif(user_input == 3):
             os.system('clear')
-            print("How many cycles would you like to do?")
-            count = int(input("\n>>"))
-            print("What method would you like to use?")
-            print("1) auto")
-            print("2) supervised")
-            method = int(input("\n>>"))
+
+            genNUM = int(input("How many generations?\n>>"))
+
+            file_num = 0
+            totalGen = []
+            for f in range(genNUM):
+                tempPop = []
+                file_path = "tempSteady%s.txt" % (str(f))
+                path = os.path.join(self.DATA_FOLDER, file_path)
+                self.importChromosomeIntoArray(path, tempPop)
+                totalGen.append(tempPop)
+                file_num += 1
+
+            for gen in range(len(totalGen)):
+                current_gen = totalGen[gen]
+                current_gen_fit_sum = 0
+                current_gen_avg = 0
+                for ind in range(len(current_gen)):
+                    current_ind = current_gen[ind]
+                    current_gen_fit_sum += current_ind.getFit()
+                
+                current_gen_avg = current_gen_fit_sum / (len(current_gen))
+                print("GEN %s has an avg fit of %s" % (gen, current_gen_avg))
+            
+            print("Collect data, press enter when done!")
+            input(">> ")
+            self.performGA()
 
         else:
             pass
 
+        # for u in range(50):
+        #     if u == 0:
+        #         pass
+        #     else:
+        #         path = os.path.join(self.DATA_FOLDER, str("tempSteady%s.txt" % (str(u))))
+        #         with open(path, "r") as f:
+        #             pass
+
+
         n = 0
-        while (self.avgFitPop < 9.3) and (n < count):
+        while (n < count):
             # random init if empty
             if(self.lenPopulation() == 0):
                 self.randomGenerate()
@@ -685,9 +791,12 @@ class Population:
                     if (yFit < 0.1):
                         yFit = 0.1
                     
-                    print("Fitness => " + str(yFit))
-
-                    current_mem.updateFitness(yFit)                    
+                    # add a little bit of guessing to simulate human error
+                    if(variation == 1):
+                        variated_yFit = self.variate(yFit, 0.10)
+                        current_mem.updateFitness(variated_yFit) 
+                    else: 
+                        current_mem.updateFitness(yFit)                   
 
                     # Transfering data from testQueue to buildQueue
                     if(current_mem.getFit() is not None):
@@ -700,57 +809,6 @@ class Population:
                     self.writePopulation(self.BUILD_QUEUE, self.buildQueue)
                     self.writePopulation(self.TEST_QUEUE, self.testQueue)
                     self.writePopulation(self.STEADY_POPULATION)
-
-                # # if method is set to supervised
-                # else:
-                #     os.system("clear")     
-                #     print("CURRENT WORKING GA => " + str(self.DIR))
-                #     print("\n")
-
-                #     print("There are still individuals in the testQueue that must be tested!")
-                #     print("Before the GA can continue, you must first assign a fitness to these")
-                #     print("individuals!")
-
-                #     print("What would you like to do?")
-                #     print("  1) Assign fitness")
-                #     print("  2) Exit and Save")
-                #     try:
-                #         opt = int(input(">> "))
-                #     except ValueError:
-                #         os.sys.exit("Not an option, halting GA! Checking data...")
-
-                #     # Assigning a fitness to the member
-                #     if(opt == 1):
-                #         # Clearing for legibility
-                #         os.system("clear")
-                #         print(current_mem.geneArray())
-                #         while True:
-                #             try:
-                #                 # get the fitness from user
-                #                 input_fit = float(input("What would you rate this coffee?"))
-                #                 break
-                #             except ValueError:
-                #                 print("This is not an option! Try Again!")
-
-                #         # updating current members fitness
-                #         current_mem.updateFitness(input_fit)
-
-                #         # Transfering data from testQueue to buildQueue
-                #         self.buildQueue.append(current_mem)
-                #         self.testQueue.remove(current_mem)
-
-                #         # save data
-                #         self.writePopulation(self.BUILD_QUEUE, self.buildQueue)
-                #         self.writePopulation(self.TEST_QUEUE, self.testQueue)
-                #         self.writePopulation(self.STEADY_POPULATION)
-                #     elif(opt == 2):
-                #         # saving all our data and exiting
-                #         self.writePopulation(self.STEADY_POPULATION)
-                #         self.writePopulation(self.TEST_QUEUE, self.testQueue)
-                #         self.writePopulation(self.BUILD_QUEUE, self.buildQueue)
-                #         os.sys.exit("Halting GA Procedure, data saved! Thanks!")
-                #     else:
-                #         pass
 
             self.writePopulation(self.TEST_QUEUE, self.testQueue)
             self.writePopulation(self.BUILD_QUEUE, self.buildQueue)
@@ -804,10 +862,6 @@ class Population:
                     self.openFile(tempTest)
                     self.openFile(tempCementary)
 
-            print("------------------------------------------------------------")
-            print("Data is about to change drastically, press enter when ready!")
-            print("------------------------------------------------------------")
-
             for j in range(floor(self.size*self.REPLACE)):
                 # Parent Selection
                 P1, P2 = self.parentSelection()
@@ -816,9 +870,10 @@ class Population:
                 Child = self.crossover(P1, P2)
 
                 # index for replacement is chosen
-                index = self.replaceForDeath()
-
-                print("[%s] has been chosen for death!" % (str(index)))
+                if(rand_replacement == 1):
+                    index = self.randomSelection()
+                else:
+                    index = self.replaceForDeath()
 
                 # replacement occurs
                 current_member = self.population[index]
@@ -840,22 +895,38 @@ class Population:
 
             # TELEMETRY / LOGGING
             n += 1
+            os.system('clear')
+            print("Current Directory => %s" % self.DIR)
             print("-------GENERATION %s-------" % (str(n)))
-            GA.displayPopulation()
+            print("GA Average Fitness => " + str(self.avgFitPop))
             print("\n")
+
+    
 
         
 
 
 if __name__ == "__main__":
-    GA = Population(160)
-    GA.SELECT_FOR_TESTING = 0.4
-    GA.REPLACE = 0.37
+    GA = Population(80)
+
+    GA.SELECT_FOR_TESTING = 0.31
+    GA.REPLACE = 0.64
+    
     rootChromo = Chromosome()
     rootChromo.line = 1
     rootChromo.addGene("qC", 30)
     rootChromo.addGene("qS", 12)
     GA.addRoot(rootChromo)
 
+    test_param_queue = [
+        [0, 0, 0.20, 0.80],
+        [1, 0, 0.20, 0.80],
+        [1, 1, 0.20, 0.80],
+        [0, 0, 0.10, 0.90],
+        [1, 0, 0.10, 0.90],
+        [1, 1, 0.10, 0.90]
+    ]
 
-    GA.performGA()
+    for param in range(len(test_param_queue)):
+        c_ = test_param_queue[param]
+        GA.performGA(c_[0], c_[1], c_[2], c_[3])
